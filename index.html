@@ -264,16 +264,39 @@ return;
 }
 
 /* Rule 1 — General */
+/* Rule 1 — General */
 if (selectedRule === "1") {
+
+if (medial === 0) { // ㅏ
+steps += "2️⃣ ㅏ + 아 → no doubling<br>";
+steps += "3️⃣ Added 요";
+
+finalResult.textContent = stem + "요";
+ruleDisplay.innerHTML = steps;
+return;
+}
+
+if (medial === 4) { // ㅓ
+steps += "2️⃣ ㅓ + 어 → no doubling<br>";
+steps += "3️⃣ Added 요";
+
+finalResult.textContent = stem + "요";
+ruleDisplay.innerHTML = steps;
+return;
+}
 
 steps += "2️⃣ Added 아요 / 어요<br>";
 steps += "3️⃣ Added 요";
 
-finalResult.textContent = (medial === 0 || medial === 8) ? stem + "아요" : stem + "어요";
-ruleDisplay.innerHTML = steps;
+finalResult.textContent =
+(medial === 0 || medial === 8)
+? stem + "아요"
+: stem + "어요";
 
+ruleDisplay.innerHTML = steps;
 return;
 }
+
 
 }
 </script>
