@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korean Grammar Table</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+body { font-family: 'Noto Sans KR', sans-serif; }
+.strikethrough {
+text-decoration: line-through;
+text-decoration-color: #e11d48;
+text-decoration-thickness: 2px;
+}
+</style>
+</head>
+
+<body class="h-full bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 flex items-center justify-center p-6 overflow-auto">
+<main class="w-full max-w-2xl">
+<div class="relative bg-white rounded-2xl shadow-2xl border-2 border-rose-200 p-8">
+
+<table class="w-full border-collapse">
+<tbody>
+
+<tr>
+<td class="border-2 border-rose-300 p-6 text-center bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-tl-xl w-1/2">
+<label class="block text-sm font-medium text-yellow-600 mb-2">
+Verb (infinitive):
+</label>
+<input id="verbInput" type="text"
+placeholder="크다"
+class="w-full px-4 py-3 text-2xl font-bold text-center bg-white border-2 border-yellow-300 rounded-lg">
+<div class="text-lg text-yellow-500 mt-2">infinitive</div>
+</td>
+
+<td class="border-2 border-rose-300 p-6 text-center bg-gradient-to-br from-violet-50 to-purple-100 rounded-tr-xl w-1/2">
+<label class="block text-sm font-medium text-violet-600 mb-2">
+Select ending:
+</label>
+<select id="endingSelect"
+class="w-full px-4 py-3 text-2xl font-bold text-center bg-white border-2 border-violet-300 rounded-lg cursor-pointer">
+<option value="요">요</option>
+</select>
+</td>
+</tr>
+
+<tr>
+<td class="border-2 border-rose-300 p-6 text-center bg-gradient-to-br from-amber-50 to-yellow-100 rounded-bl-xl">
+<div class="text-sm font-medium text-amber-600 mb-2">Process:</div>
+
+<select id="ruleSelect"
+class="w-full px-4 py-3 text-xl font-bold text-center bg-white border-2 border-amber-300 rounded-lg cursor-pointer">
+<option value="">Select rule</option>
+<option value="1">Rule 1 — General</option>
+<option value="2">Rule 2 — ㅗ / ㅜ combine</option>
+<option value="3">Rule 3 — ㅣ + 어</option>
+<option value="4">Rule 4 — ㅡ drop</option>
+<option value="5">Rule 5 — 하다</option>
+<option value="6">Rule 6 — ㅂ irregular</option>
+<option value="7">Rule 7 — ㄷ irregular</option>
+<option value="8">Rule 8 — 르 irregular</option>
+<option value="9">Rule 9 — ㅅ irregular</option>
+<option value="10">Rule 10 — ㅎ irregular</option>
+</select>
+</td>
+
+<td class="border-2 border-rose-300 p-6 bg-gradient-to-br from-emerald-50 to-teal-100 rounded-br-xl">
+<div id="ruleDisplay"
+class="text-lg font-bold text-emerald-700 text-left leading-relaxed">
+-
+</div>
+
+</td>
+</tr>
+</tbody>
+</table>
+
+<div class="mt-6 border-2 border-purple-300 p-6 text-center bg-gradient-to-br from-purple-50 to-pink-100 rounded-xl">
+<div class="text-sm font-medium text-purple-600 mb-2">Final Conjugation:</div>
+<div id="finalResult" class="text-4xl font-bold text-purple-700">-</div>
+</div>
+
+</div>
+</main>
+
+<script>
+const verbInput = document.getElementById("verbInput");
+const ruleSelect = document.getElementById("ruleSelect");
+const finalResult = document.getElementById("finalResult");
+const ruleDisplay = document.getElementById("ruleDisplay");
+
+verbInput.addEventListener("input", update);
+ruleSelect.addEventListener("change", update);
+
+function update() {
+
+const verb = verbInput.value.trim();
+const selectedRule = ruleSelect.value;
+
+if (!verb.endsWith("다") || selectedRule === "") {
+finalResult.textContent = "-";
+ruleDisplay.textContent = "-";
+return;
+}
+
+let stem = verb.slice(0, -1);
+let steps = "1️⃣ 다 removed → " + stem + "<br>";
+
+
+const lastChar = stem[stem.length - 1];
+const base = lastChar.charCodeAt(0) - 0xAC00;
+
+if (base < 0 || base > 11171) return;
+
+const initial = Math.floor(base / 588);
+const medial = Math.floor((base % 588) / 28);
+const final = base % 28;
+
+/* Rule 5 — 하다 */
+if (selectedRule === "5" && stem.endsWith("하")) {
+
+steps += "2️⃣ 하 + 여 → 해<br>";
+steps += "3️⃣ Added 요";
+
+finalResult.textContent = stem.slice(0,-1) + "해요";
+ruleDisplay.innerHTML = steps;
+return;
+}
+
+/* Rule 8 — 르 */
+if (selectedRule === "8" && stem.endsWith("르")) {
+
+const before = stem[stem.length - 2];
+const beforeBase = before.charCodeAt(0) - 0xAC00;
+const bInitial = Math.floor(beforeBase / 588);
+const bMedial = Math.floor((beforeBase % 588) / 28);
+
+const newBefore = String.fromCharCode(0xAC00 + (bInitial * 588) + (bMedial * 28) + 8);
+
+steps += "2️⃣ Added ㄹ + 르 → 라/러<br>";
+steps += "3️⃣ Added 요";
+
+if (bMedial === 0 || bMedial === 8)
+finalResult.textContent = stem.slice(0,-2) + newBefore + "라요";
+else
+finalResult.textContent = stem.slice(0,-2) + newBefore + "러요";
+
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 6 — ㅂ */
+if (selectedRule === "6" && final === 17) {
+
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (medial * 28));
+stem = stem.slice(0,-1) + newChar + "우";
+
+steps += "2️⃣ ㅂ → 우<br>";
+steps += "3️⃣ Applied general rule + 요";
+
+finalResult.textContent = (medial === 0 || medial === 8) ? stem + "아요" : stem + "어요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 7 — ㄷ */
+if (selectedRule === "7" && final === 7) {
+
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (medial * 28) + 8);
+stem = stem.slice(0,-1) + newChar;
+
+steps += "2️⃣ ㄷ → ㄹ<br>";
+steps += "3️⃣ Added 어요";
+
+finalResult.textContent = stem + "어요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 9 — ㅅ */
+if (selectedRule === "9" && final === 19) {
+
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (medial * 28));
+stem = stem.slice(0,-1) + newChar;
+
+steps += "2️⃣ ㅅ removed<br>";
+steps += "3️⃣ Added 어요";
+
+finalResult.textContent = stem + "어요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 10 — ㅎ */
+if (selectedRule === "10" && final === 27) {
+
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (5 * 28));
+stem = stem.slice(0,-1) + newChar;
+
+steps += "2️⃣ ㅎ removed + vowel change<br>";
+steps += "3️⃣ Added 요";
+
+finalResult.textContent = stem + "요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 4 — ㅡ */
+if (selectedRule === "4" && medial === 18) {
+
+const newChar = String.fromCharCode(0xAC00 + (initial * 588));
+stem = stem.slice(0,-1) + newChar;
+
+steps += "2️⃣ ㅡ removed<br>";
+steps += "3️⃣ Added 어요";
+
+finalResult.textContent = stem + "어요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 3 — ㅣ */
+if (selectedRule === "3" && medial === 20) {
+
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (5 * 28) + final);
+stem = stem.slice(0,-1) + newChar;
+
+steps += "2️⃣ ㅣ + 어 → 여<br>";
+steps += "3️⃣ Added 요";
+
+finalResult.textContent = stem + "요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 2 — ㅗ / ㅜ */
+if (selectedRule === "2") {
+
+steps += "2️⃣ ㅗ/ㅜ vowel combine<br>";
+steps += "3️⃣ Added 요";
+
+if (medial === 8) {
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (9 * 28) + final);
+stem = stem.slice(0,-1) + newChar;
+}
+if (medial === 13) {
+const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (14 * 28) + final);
+stem = stem.slice(0,-1) + newChar;
+}
+
+finalResult.textContent = stem + "요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+/* Rule 1 — General */
+if (selectedRule === "1") {
+
+steps += "2️⃣ Added 아요 / 어요<br>";
+steps += "3️⃣ Added 요";
+
+finalResult.textContent = (medial === 0 || medial === 8) ? stem + "아요" : stem + "어요";
+ruleDisplay.innerHTML = steps;
+
+return;
+}
+
+}
+</script>
+
+
+</body>
+</html>
