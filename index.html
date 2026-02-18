@@ -267,7 +267,7 @@ return;
 /* Rule 1 — General */
 if (selectedRule === "1") {
 
-if (medial === 0) { // ㅏ
+if (medial === 0 && final === 0) { // ㅏ fără batchim
 steps += "2️⃣ ㅏ + 아 → no doubling<br>";
 steps += "3️⃣ Added 요";
 
@@ -276,7 +276,7 @@ ruleDisplay.innerHTML = steps;
 return;
 }
 
-if (medial === 4) { // ㅓ
+if (medial === 4 && final === 0) { // ㅓ fără batchim
 steps += "2️⃣ ㅓ + 어 → no doubling<br>";
 steps += "3️⃣ Added 요";
 
@@ -296,6 +296,7 @@ finalResult.textContent =
 ruleDisplay.innerHTML = steps;
 return;
 }
+
 
 
 }
