@@ -228,20 +228,37 @@ return;
 }
 
 /* Rule 3 — ㅣ */
-if (selectedRule === "3" && medial === 20) {
+/* Rule 3 — ㅣ */
+if (selectedRule === "3") {
 
-const newChar = String.fromCharCode(0xAC00 + (initial * 588) + (5 * 28) + final);
-stem = stem.slice(0,-1) + newChar;
+    const lastChar = stem[stem.length - 1];
+    const base = lastChar.charCodeAt(0) - 0xAC00;
 
-steps += "2️⃣ ㅣ + 어 → 여<br>";
-steps += "3️⃣ Added 요";
+    if (base >= 0 && base <= 11171) {
 
-finalResult.textContent = stem + "요";
-ruleDisplay.innerHTML = steps;
+        const initial = Math.floor(base / 588);
+        const medial = Math.floor((base % 588) / 28);
+        const final = base % 28;
 
-return;
+        // 20 = ㅣ
+        if (medial === 20) {
+
+            // schimbăm vocala în ㅕ (index 6)
+            const newChar = String.fromCharCode(
+                0xAC00 + (initial * 588) + (6 * 28) + final
+            );
+
+            stem = stem.slice(0, -1) + newChar;
+
+            steps += "2️⃣ ㅣ + 어 → ㅕ<br>";
+            steps += "3️⃣ Added 요";
+
+            finalResult.textContent = stem + "요";
+            ruleDisplay.innerHTML = steps;
+            return;
+        }
+    }
 }
-
 /* Rule 2 — ㅗ / ㅜ */
 if (selectedRule === "2") {
 
