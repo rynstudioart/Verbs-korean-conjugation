@@ -92,6 +92,7 @@ ruleSelect.innerHTML = `
 <option value="">Select rule</option>
 <option value="p1">Base — 았어요 (ㅏ/ㅗ)</option>
 <option value="p2">Base — 었어요</option>
+<option value="p9">ㅡ drop</option>
 <option value="p3">하다 → 했어요</option>
 <option value="p4">ㅂ irregular</option>
 <option value="p5">ㄷ irregular</option>
@@ -146,10 +147,41 @@ const final = base%28;
 
 /* PAST */
 if (tense==="past"){
-let pastEnding=(medial===0||medial===8)?"았어요":"었어요";
-finalResult.textContent=stem+pastEnding;
-ruleDisplay.innerHTML=steps+"3️⃣ Added "+pastEnding;
-return;
+
+// ㅡ drop selected
+if (selectedRule === "p9") {
+
+    if (medial !== 18) {
+        ruleDisplay.innerHTML = "❌ Not a ㅡ verb";
+        finalResult.textContent = "-";
+        return;
+    }
+
+    const prevChar = stem[stem.length - 2];
+    const prevBase = prevChar.charCodeAt(0) - 0xAC00;
+    const prevMedial = Math.floor((prevBase % 588) / 28);
+
+    let ending = (prevMedial===0||prevMedial===8) ? "았어요" : "었어요";
+
+    finalResult.textContent = stem.slice(0,-1) + ending;
+    ruleDisplay.innerHTML = steps + "3️⃣ ㅡ drop → " + ending;
+    return;
+}
+
+// Base 았어요
+if (selectedRule === "p1") {
+    finalResult.textContent = stem + "았어요";
+    ruleDisplay.innerHTML = steps + "3️⃣ Added 았어요";
+    return;
+}
+
+// Base 었어요
+if (selectedRule === "p2") {
+    finalResult.textContent = stem + "었어요";
+    ruleDisplay.innerHTML = steps + "3️⃣ Added 었어요";
+    return;
+}
+
 }
 
 /* FUTURE */
