@@ -148,24 +148,37 @@ const final = base%28;
 /* PAST */
 if (tense==="past"){
 
-// ㅡ drop selected
-if (selectedRule === "p9") {
-
-    if (medial !== 18) {
-        ruleDisplay.innerHTML = "❌ Not a ㅡ verb";
-        finalResult.textContent = "-";
-        return;
-    }
+// ㅡ drop
+if (medial === 18) { // 18 = ㅡ
 
     const prevChar = stem[stem.length - 2];
     const prevBase = prevChar.charCodeAt(0) - 0xAC00;
     const prevMedial = Math.floor((prevBase % 588) / 28);
 
-    let ending = (prevMedial===0||prevMedial===8) ? "았어요" : "었어요";
+    const newMedial = (prevMedial===0||prevMedial===8) ? 0 : 4; 
+    // 0 = ㅏ
+    // 4 = ㅓ
 
-    finalResult.textContent = stem.slice(0,-1) + ending;
-    ruleDisplay.innerHTML = steps + "3️⃣ ㅡ drop → " + ending;
+    const newFinal = 20; // ㅆ
+
+    const newCharCode = 0xAC00 + (initial*588) + (newMedial*28) + newFinal;
+    const newChar = String.fromCharCode(newCharCode);
+
+    finalResult.textContent = stem.slice(0,-1) + newChar + "어요";
+    ruleDisplay.innerHTML = steps + "3️⃣ ㅡ drop + ㅆ batchim";
     return;
+}
+
+// normal verbs
+let newMedial = (medial===0||medial===8) ? 0 : 4; 
+let newFinal = 20; // ㅆ
+
+const newCharCode = 0xAC00 + (initial*588) + (newMedial*28) + newFinal;
+const newChar = String.fromCharCode(newCharCode);
+
+finalResult.textContent = stem.slice(0,-1) + newChar + "어요";
+ruleDisplay.innerHTML = steps + "3️⃣ Added ㅆ batchim";
+return;
 }
 
 // Base 았어요
