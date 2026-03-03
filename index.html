@@ -186,21 +186,19 @@ if (selectedRule === "p2") {
 
 /* FUTURE */
 if (tense==="future"){
-if(final===0){
-finalResult.textContent=stem+"ㄹ 거예요";
-ruleDisplay.innerHTML=steps+"3️⃣ No batchim → ㄹ 거예요";
-}else{
-finalResult.textContent=stem+"을 거예요";
-ruleDisplay.innerHTML=steps+"3️⃣ Batchim → 을 거예요";
-}
-return;
-}
 
-/* PRESENT */
-if (tense==="present"){
-let presEnding=(medial===0||medial===8)?"아요":"어요";
-finalResult.textContent=stem+presEnding;
-ruleDisplay.innerHTML=steps+"3️⃣ Added "+presEnding;
+if (final === 0) { // no batchim
+
+    const newFinal = 8; // ㄹ
+    const newCharCode = 0xAC00 + (initial*588) + (medial*28) + newFinal;
+    const newChar = String.fromCharCode(newCharCode);
+
+    finalResult.textContent = stem.slice(0,-1) + newChar + " 거예요";
+    ruleDisplay.innerHTML = steps + "3️⃣ Added ㄹ batchim";
+} else {
+    finalResult.textContent = stem + "을 거예요";
+    ruleDisplay.innerHTML = steps + "3️⃣ Added 을 거예요";
+}
 return;
 }
 
