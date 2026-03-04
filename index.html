@@ -129,10 +129,9 @@ return String.fromCharCode(0xAC00 + (initial*588) + (medial*28) + final);
 function update(){
 
 const verb = verbInput.value.trim();
-const rule = ruleSelect.value;
 const tense = endingSelect.value;
 
-if (!verb.endsWith("다") || rule===""){
+if (!verb.endsWith("다")){
 finalResult.textContent="-";
 ruleDisplay.innerHTML="-";
 return;
@@ -142,47 +141,79 @@ let stem = verb.slice(0,-1);
 let last = stem[stem.length-1];
 let parts = getHangulParts(last);
 
-let result="";
-let steps="1️⃣ Removed 다 → "+stem+"<br>";
+function hasBatchim(p){ return p.final !== 0; }
+function isL(p){ return p.final === 8; }      // ㄹ
+function isB(p){ return p.final === 17; }     // ㅂ
+function isD(p){ return p.final === 7; }      // ㄷ
+function isS(p){ return p.final === 19; }     // ㅅ
+function isH(p){ return p.final === 27; }     // ㅎ
+function isEu(p){ return p.medial === 18; }   // ㅡ
+
+// REAL ㅂ irregular list
+const bIrregulars = ["돕다","곱다","춥다","덥다","어렵다","무겁다","더럽다","맵다","쉽다","귀엽다","아름답다"];
+
+let result = "";
 
 /* ================= PRESENT ================= */
 
 if(tense==="present"){
 
-if(rule==="hada"){
-result = stem.slice(0,-2)+"해요";
+// 하다
+if(verb==="하다"){
+result = "해요";
 }
 
-else if(rule==="eu" && parts.medial===18){
+// ㅂ irregular
+else if(bIrregulars.includes(verb) && isB(parts)){
+let base = buildHangul(parts.initial, parts.medial, 0);
+if(parts.medial===8) result = stem.slice(0,-1)+base+"와요";
+else result = stem.slice(0,-1)+base+"워요";
+}
+
+// ㄷ irregular
+else if(isD(parts)){
+let base = buildHangul(parts.initial, parts.medial, 8);
+result = stem.slice(0,-1)+base+"어요";
+}
+
+// ㅅ irregular
+else if(isS(parts)){
+let base = buildHangul(parts.initial, parts.medial, 0);
+result = stem.slice(0,-1)+base+"어요";
+}
+
+// 르 irregular
+else if(stem.endsWith("르")){
 let prev = stem[stem.length-2];
 let p = getHangulParts(prev);
-let newMedial = (p.medial===0||p.medial===8)?0:4;
-result = stem.slice(0,-1)+buildHangul(parts.initial,newMedial)+"요";
+let newPrev = buildHangul(p.initial, p.medial, 8);
+let vowel = (p.medial===0||p.medial===8)?"라요":"러요";
+result = stem.slice(0,-2)+newPrev+vowel;
 }
 
-else if(rule==="ou" && parts.medial===8){
-result = stem.slice(0,-1)+buildHangul(parts.initial,9)+"요"; // ㅘ
+// ㅎ irregular (adjectives)
+else if(isH(parts)){
+let base = buildHangul(parts.initial, parts.medial, 0);
+result = stem.slice(0,-1)+base+"해요";
 }
 
-else if(rule==="i" && parts.medial===20){
-result = stem.slice(0,-1)+buildHangul(parts.initial,6)+"요"; // ㅕ
+// ㅡ drop
+else if(isEu(parts)){
+let prev = stem[stem.length-2];
+let p = getHangulParts(prev);
+let newVowel = (p.medial===0||p.medial===8)?0:4;
+let base = buildHangul(parts.initial,newVowel,parts.final);
+result = stem.slice(0,-1)+base+"요";
 }
 
-else if(rule==="b" && parts.final===17){
-result = stem.slice(0,-1)+buildHangul(parts.initial,13)+"요"; // 워
-}
-
-else if(rule==="d" && parts.final===7){
-result = stem.slice(0,-1)+buildHangul(parts.initial,parts.medial,8)+"어요";
-}
-
-else if(rule==="s" && parts.final===19){
-result = stem.slice(0,-1)+buildHangul(parts.initial,parts.medial)+"어요";
-}
-
+// General
 else{
-let newMedial=(parts.medial===0||parts.medial===8)?0:4;
-result = stem.slice(0,-1)+buildHangul(parts.initial,newMedial)+"요";
+if(hasBatchim(parts)) result = stem+"어요";
+else{
+let newVowel=(parts.medial===0||parts.medial===8)?0:4;
+let base=buildHangul(parts.initial,newVowel,0);
+result=stem.slice(0,-1)+base+"요";
+}
 }
 
 }
@@ -191,20 +222,25 @@ result = stem.slice(0,-1)+buildHangul(parts.initial,newMedial)+"요";
 
 if(tense==="past"){
 
-if(rule==="hada"){
-result = stem.slice(0,-2)+"했어요";
+if(verb==="하다"){
+result="했어요";
 }
 
-else if(rule==="eu" && parts.medial===18){
+else if(stem.endsWith("르")){
 let prev = stem[stem.length-2];
 let p = getHangulParts(prev);
-let newMedial = (p.medial===0||p.medial===8)?0:4;
-result = stem.slice(0,-1)+buildHangul(parts.initial,newMedial,20)+"어요";
+let newPrev = buildHangul(p.initial, p.medial, 8);
+let vowel = (p.medial===0||p.medial===8)?"랐어요":"렀어요";
+result = stem.slice(0,-2)+newPrev+vowel;
 }
 
 else{
-let newMedial=(parts.medial===0||parts.medial===8)?0:4;
-result = stem.slice(0,-1)+buildHangul(parts.initial,newMedial,20)+"어요";
+if(hasBatchim(parts)) result=stem+"었어요";
+else{
+let newVowel=(parts.medial===0||parts.medial===8)?0:4;
+let base=buildHangul(parts.initial,newVowel,20);
+result=stem.slice(0,-1)+base+"어요";
+}
 }
 
 }
@@ -213,17 +249,25 @@ result = stem.slice(0,-1)+buildHangul(parts.initial,newMedial,20)+"어요";
 
 if(tense==="future"){
 
-if(parts.final===0){
-result = stem.slice(0,-1)+buildHangul(parts.initial,parts.medial,8)+" 거예요";
+if(verb==="하다"){
+result="할 거예요";
+}
+
+else if(!hasBatchim(parts)){
+result=stem+"ㄹ 거예요";
+}
+else if(isL(parts)){
+let base=buildHangul(parts.initial,parts.medial,0);
+result=stem.slice(0,-1)+base+"ㄹ 거예요";
 }
 else{
-result = stem+"을 거예요";
+result=stem+"을 거예요";
 }
 
 }
 
 finalResult.textContent=result;
-ruleDisplay.innerHTML=steps+"2️⃣ Applied rule → "+rule;
+ruleDisplay.innerHTML="Auto rule applied";
 
 }
 
