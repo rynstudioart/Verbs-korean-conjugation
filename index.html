@@ -1,278 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko" class="h-full">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Korean Grammar Table</title>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korean Verb Conjugator</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 body { font-family: 'Noto Sans KR', sans-serif; }
-</style>
-</head>
-
-<body class="h-full bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 flex items-center justify-center p-6 overflow-auto">
-<main class="w-full max-w-2xl">
-<div class="bg-white rounded-2xl shadow-2xl border-2 border-rose-200 p-8">
-
-<table class="w-full border-collapse">
-<tbody>
-
-<tr>
-<td class="border-2 border-rose-300 p-6 text-center bg-yellow-100 w-1/2">
-<input id="verbInput" type="text" placeholder="크다"
-class="w-full px-4 py-3 text-2xl font-bold text-center border-2 border-yellow-300 rounded-lg">
-</td>
-
-<td class="border-2 border-rose-300 p-6 text-center bg-purple-100 w-1/2">
-<select id="endingSelect"
-class="w-full px-4 py-3 text-2xl font-bold text-center border-2 border-purple-300 rounded-lg">
-<option value="present">요 (Present)</option>
-<option value="past">았어요 / 었어요 (Past)</option>
-<option value="future">ㄹ 거예요 / 을 거예요 (Future)</option>
-</select>
-</td>
-</tr>
-
-<tr>
-<td class="border-2 border-rose-300 p-6 text-center bg-amber-100">
-<select id="ruleSelect"
-class="w-full px-4 py-3 text-xl font-bold text-center border-2 border-amber-300 rounded-lg">
-</select>
-</td>
-
-<td class="border-2 border-rose-300 p-6 bg-emerald-100">
-<div id="ruleDisplay"
-class="text-lg font-bold text-emerald-700 leading-relaxed">
--
-</div>
-</td>
-</tr>
-</tbody>
-</table>
-
-<div class="mt-6 border-2 border-purple-300 p-6 text-center bg-purple-100 rounded-xl">
-<div id="finalResult" class="text-4xl font-bold text-purple-700">-</div>
-</div>
-
-</div>
-</main>
-
-<script>
-const verbInput = document.getElementById("verbInput");
-const ruleSelect = document.getElementById("ruleSelect");
-const endingSelect = document.getElementById("endingSelect");
-const finalResult = document.getElementById("finalResult");
-const ruleDisplay = document.getElementById("ruleDisplay");
-
-verbInput.addEventListener("input", update);
-ruleSelect.addEventListener("change", update);
-endingSelect.addEventListener("change", updateRulesByEnding);
-
-function updateRulesByEnding() {
-const tense = endingSelect.value;
-
-if (tense === "present") {
-ruleSelect.innerHTML = `
-<option value="">Select rule</option>
-<option value="general">General</option>
-<option value="ou">ㅗ / ㅜ combine</option>
-<option value="i">ㅣ → ㅕ</option>
-<option value="eu">ㅡ drop</option>
-<option value="hada">하다</option>
-<option value="b">ㅂ irregular</option>
-<option value="d">ㄷ irregular</option>
-<option value="reu">르 irregular</option>
-<option value="s">ㅅ irregular</option>
-<option value="h">ㅎ irregular</option>`;
-}
-
-if (tense === "past") {
-ruleSelect.innerHTML = `
-<option value="">Select rule</option>
-<option value="general">General</option>
-<option value="eu">ㅡ drop</option>
-<option value="hada">하다</option>
-<option value="b">ㅂ irregular</option>
-<option value="d">ㄷ irregular</option>
-<option value="reu">르 irregular</option>
-<option value="s">ㅅ irregular</option>
-<option value="h">ㅎ irregular</option>`;
-}
-
-if (tense === "future") {
-ruleSelect.innerHTML = `
-<option value="">Select rule</option>
-<option value="general">Regular</option>
-<option value="b">ㅂ irregular</option>
-<option value="d">ㄷ irregular</option>
-<option value="reu">르 irregular</option>
-<option value="s">ㅅ irregular</option>`;
-}
-
-update();
-}
-
-function getHangulParts(char){
-const base = char.charCodeAt(0) - 0xAC00;
-return {
-initial: Math.floor(base/588),
-medial: Math.floor((base%588)/28),
-final: base%28
+.glow { text-shadow: 0 0 20px rgba(219, 39, 119, 0.3); }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 overflow-auto">
+  <div class="min-h-full flex items-center justify-center p-6">
+   <main class="w-full max-w-2xl">
+    <h1 id="app-title" class="text-3xl font-black text-center mb-6 text-rose-600 glow">Korean Verb Conjugator</h1>
+    <div class="bg-white rounded-3xl shadow-2xl border-4 border-rose-200 overflow-hidden">
+     <table class="w-full border-collapse">
+      <tbody>
+       <tr>
+        <td class="border-2 border-rose-200 p-6 text-center bg-gradient-to-br from-yellow-50 to-amber-100 w-1/2"><label class="block text-sm font-bold text-yellow-700 mb-2">동사 (Verb)</label> <input id="verbInput" type="text" placeholder="가다, 먹다, 하다..." class="w-full px-4 py-3 text-2xl font-bold text-center border-3 border-yellow-400 rounded-xl bg-white focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 transition-all"></td>
+        <td class="border-2 border-rose-200 p-6 text-center bg-gradient-to-br from-purple-50 to-violet-100 w-1/2"><label class="block text-sm font-bold text-purple-700 mb-2">시제 (Tense)</label> <select id="endingSelect" class="w-full px-4 py-3 text-xl font-bold text-center border-3 border-purple-400 rounded-xl bg-white focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all cursor-pointer"> <option value="present">현재 Present (-아/어요)</option> <option value="past">과거 Past (-았/었어요)</option> <option value="future">미래 Future (-ㄹ/을 거예요)</option> </select></td>
+       </tr>
+       <tr>
+        <td colspan="2" class="border-2 border-rose-200 p-6 bg-gradient-to-br from-emerald-50 to-teal-100"><label class="block text-sm font-bold text-emerald-700 mb-2 text-center">적용된 규칙 (Applied Rule)</label>
+         <div id="ruleDisplay" class="text-xl font-bold text-emerald-800 text-center p-4 bg-white/50 rounded-xl min-h-[60px] flex items-center justify-center">
+          동사를 입력하세요
+         </div></td>
+       </tr>
+      </tbody>
+     </table>
+     <div class="p-8 bg-gradient-to-br from-pink-100 to-rose-200"><label class="block text-sm font-bold text-rose-700 mb-3 text-center">결과 (Result)</label>
+      <div id="finalResult" class="text-5xl font-black text-rose-700 text-center p-6 bg-white rounded-2xl shadow-inner min-h-[80px] flex items-center justify-center glow">
+       -
+      </div>
+     </div>
+    </div>
+    <div class="mt-6 bg-white/80 rounded-2xl p-4 border-2 border-rose-200">
+     <p class="text-center text-sm text-gray-600"><span class="font-bold">예시:</span> 가다, 먹다, 하다, 공부하다, 듣다, 돕다, 살다, 만들다, 쓰다, 크다, 예쁘다</p>
+    </div>
+   </main>
+  </div>
+  <script>
+const defaultConfig = {
+  title: "Korean Verb Conjugator"
 };
+
+let config = { ...defaultConfig };
+
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (newConfig) => {
+      config = { ...defaultConfig, ...newConfig };
+      document.getElementById('app-title').textContent = config.title || defaultConfig.title;
+    },
+    mapToCapabilities: (cfg) => ({
+      recolorables: [],
+      borderables: [],
+      fontEditable: undefined,
+      fontSizeable: undefined
+    }),
+    mapToEditPanelValues: (cfg) => new Map([
+      ["app_title", cfg.title || defaultConfig.title]
+    ])
+  });
 }
 
-function buildHangul(initial, medial, final=0){
-return String.fromCharCode(0xAC00 + (initial*588) + (medial*28) + final);
+function conjugateVerb(verb, tense) {
+  verb = verb.trim();
+  if (!verb) return { result: '-', rule: '동사를 입력하세요' };
+  if (!verb.endsWith('다')) return { result: '-', rule: '동사는 "다"로 끝나야 합니다' };
+
+  const stem = verb.slice(0, -1);
+  if (stem.length === 0) return { result: '-', rule: '유효한 동사를 입력하세요' };
+
+  const lastChar = stem[stem.length - 1];
+  const lastCharCode = lastChar.charCodeAt(0);
+
+  if (lastCharCode < 0xAC00 || lastCharCode > 0xD7A3) {
+    return { result: '-', rule: '한글 동사를 입력하세요' };
+  }
+
+  const syllableIndex = lastCharCode - 0xAC00;
+  const jongseong = syllableIndex % 28;
+  const jungseong = Math.floor((syllableIndex % 588) / 28);
+  const choseong = Math.floor(syllableIndex / 588);
+
+  const jungseongList = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
+  const choseongList = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+  const jongseongList = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+  const vowel = jungseongList[jungseong];
+  const finalCons = jongseongList[jongseong];
+
+  function buildSyllable(cho, jung, jong) {
+    return String.fromCharCode(0xAC00 + cho * 588 + jung * 28 + jong);
+  }
+
+  // 하다 verbs
+  if (verb.endsWith('하다')) {
+    const base = verb.slice(0, -2);
+    if (tense === 'present') return { result: base + '해요', rule: 'Hada verb: remove 다 and add 해요' };
+    if (tense === 'past') return { result: base + '했어요', rule: 'Hada verb: remove 다 and add 했어요' };
+    if (tense === 'future') return { result: base + '할 거예요', rule: 'Hada verb: remove 다 and add 할 거예요' };
+  }
+
+  // ㄷ irregular (듣다, 걷다)
+  if (finalCons === 'ㄷ' && (verb === '듣다' || verb === '걷다' || verb === '묻다' || verb === '싣다')) {
+    const newStem = buildSyllable(choseong, jungseong, 8);
+    if (tense === 'present') {
+      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: newStem + '아요', rule: 'ㄷ irregular: ㄷ → ㄹ + 아요' };
+      return { result: newStem + '어요', rule: 'ㄷ irregular: ㄷ → ㄹ + 어요' };
+    }
+    if (tense === 'past') {
+      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: newStem + '았어요', rule: 'ㄷ irregular: ㄷ → ㄹ + 았어요' };
+      return { result: newStem + '었어요', rule: 'ㄷ irregular: ㄷ → ㄹ + 었어요' };
+    }
+    if (tense === 'future') return { result: newStem + '을 거예요', rule: 'ㄷ irregular: ㄷ → ㄹ + 을 거예요' };
+  }
+
+  // ㅂ irregular (돕다, 춥다, 덥다, 무섭다, 어렵다, 쉽다)
+  const bIrregulars = ['돕다', '춥다', '덥다', '무섭다', '어렵다', '쉽다', '아름답다', '귀엽다', '맵다'];
+  if (finalCons === 'ㅂ' && bIrregulars.includes(verb)) {
+    const newStemChar = buildSyllable(choseong, jungseong, 0);
+    if (verb === '돕다' || verb === '곱다') {
+      if (tense === 'present') return { result: newStemChar + '와요', rule: 'ㅂ irregular: ㅂ → 오 + 아요 = 와요' };
+      if (tense === 'past') return { result: newStemChar + '왔어요', rule: 'ㅂ irregular: ㅂ → 오 + 았어요 = 왔어요' };
+      if (tense === 'future') return { result: newStemChar + '울 거예요', rule: 'ㅂ irregular: ㅂ → 우 + ㄹ 거예요' };
+    } else {
+      if (tense === 'present') return { result: newStemChar + '워요', rule: 'ㅂ irregular: ㅂ → 우 + 어요 = 워요' };
+      if (tense === 'past') return { result: newStemChar + '웠어요', rule: 'ㅂ irregular: ㅂ → 우 + 었어요 = 웠어요' };
+      if (tense === 'future') return { result: newStemChar + '울 거예요', rule: 'ㅂ irregular: ㅂ → 우 + ㄹ 거예요' };
+    }
+  }
+
+  // ㄹ ending verbs (살다, 만들다, 알다, 팔다)
+  if (finalCons === 'ㄹ') {
+    if (tense === 'present') {
+      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: stem + '아요', rule: 'ㄹ stem: add 아요' };
+      return { result: stem + '어요', rule: 'ㄹ stem: add 어요' };
+    }
+    if (tense === 'past') {
+      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: stem + '았어요', rule: 'ㄹ stem: add 았어요' };
+      return { result: stem + '었어요', rule: 'ㄹ stem: add 었어요' };
+    }
+    if (tense === 'future') return { result: stem + ' 거예요', rule: 'ㄹ stem: ㄹ 거예요' };
+  }
+
+  // ㅅ irregular (짓다, 낫다)
+  if (finalCons === 'ㅅ' && (verb === '짓다' || verb === '낫다' || verb === '붓다' || verb === '잇다')) {
+    const newStemChar = buildSyllable(choseong, jungseong, 0);
+    if (tense === 'present') {
+      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: newStemChar + '아요', rule: 'ㅅ irregular: ㅅ drops + 아요' };
+      return { result: newStemChar + '어요', rule: 'ㅅ irregular: ㅅ drops + 어요' };
+    }
+    if (tense === 'past') {
+      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: newStemChar + '았어요', rule: 'ㅅ irregular: ㅅ drops + 았어요' };
+      return { result: newStemChar + '었어요', rule: 'ㅅ irregular: ㅅ drops + 었어요' };
+    }
+    if (tense === 'future') {
+      const withRieul = buildSyllable(choseong, jungseong, 8);
+      return { result: withRieul + ' 거예요', rule: 'ㅅ irregular: ㅅ → ㄹ + 거예요' };
+    }
+  }
+
+  // ㅡ verbs (쓰다, 끄다, 크다, 슬프다, 바쁘다, 예쁘다, 아프다)
+  if (vowel === 'ㅡ' && jongseong === 0) {
+    let useA = false;
+    if (stem.length >= 2) {
+      const prevChar = stem[stem.length - 2];
+      const prevCode = prevChar.charCodeAt(0);
+      if (prevCode >= 0xAC00 && prevCode <= 0xD7A3) {
+        const prevSyllableIndex = prevCode - 0xAC00;
+        const prevJungseong = Math.floor((prevSyllableIndex % 588) / 28);
+        const prevVowel = jungseongList[prevJungseong];
+        if (prevVowel === 'ㅏ' || prevVowel === 'ㅗ') useA = true;
+      }
+    }
+    
+    const prefix = stem.length >= 2 ? stem.slice(0, -1) : '';
+    const newVowelIndex = useA ? 0 : 4;
+    const newChar = buildSyllable(choseong, newVowelIndex, 0);
+    
+    if (tense === 'present') {
+      return { result: prefix + newChar + '요', rule: 'ㅡ drop: ㅡ → ' + (useA ? '아' : '어') + '요' };
+    }
+    if (tense === 'past') {
+      const pastChar = buildSyllable(choseong, newVowelIndex, 19);
+      return { result: prefix + pastChar + '어요', rule: 'ㅡ drop: ㅡ → ' + (useA ? '았' : '었') + '어요' };
+    }
+    if (tense === 'future') {
+      const futureChar = buildSyllable(choseong, 18, 8);
+      return { result: prefix + futureChar + ' 거예요', rule: 'ㅡ stem: add ㄹ 거예요' };
+    }
+  }
+
+  // Vowel ending stems (no 받침)
+  if (jongseong === 0) {
+    // ㅏ ending (가다, 자다)
+    if (vowel === 'ㅏ') {
+      if (tense === 'present') return { result: stem + '요', rule: 'ㅏ stem: ㅏ + 아 = 아요' };
+      if (tense === 'past') {
+        const pastChar = buildSyllable(choseong, 0, 19);
+        return { result: stem.slice(0, -1) + pastChar + '어요', rule: 'ㅏ stem: ㅏ + 았 = 았어요' };
+      }
+      if (tense === 'future') {
+        const futureChar = buildSyllable(choseong, 0, 8);
+        return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: 'ㅏ stem: add ㄹ 거예요' };
+      }
+    }
+
+    // ㅓ ending (서다, 버리다)
+    if (vowel === 'ㅓ') {
+      if (tense === 'present') return { result: stem + '요', rule: 'ㅓ stem: ㅓ + 어 = 어요' };
+      if (tense === 'past') {
+        const pastChar = buildSyllable(choseong, 4, 19);
+        return { result: stem.slice(0, -1) + pastChar + '어요', rule: 'ㅓ stem: ㅓ + 었 = 었어요' };
+      }
+      if (tense === 'future') {
+        const futureChar = buildSyllable(choseong, 4, 8);
+        return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: 'ㅓ stem: add ㄹ 거예요' };
+      }
+    }
+
+    // ㅗ ending (오다, 보다)
+    if (vowel === 'ㅗ') {
+      if (tense === 'present') {
+        const newChar = buildSyllable(choseong, 9, 0);
+        return { result: stem.slice(0, -1) + newChar + '요', rule: 'ㅗ stem: ㅗ + ㅏ = 와요' };
+      }
+      if (tense === 'past') {
+        const pastChar = buildSyllable(choseong, 9, 19);
+        return { result: stem.slice(0, -1) + pastChar + '어요', rule: 'ㅗ stem: ㅗ + 았 = 왔어요' };
+      }
+      if (tense === 'future') {
+        const futureChar = buildSyllable(choseong, 8, 8);
+        return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: 'ㅗ stem: add ㄹ 거예요' };
+      }
+    }
+
+    // ㅜ ending (주다, 두다)
+    if (vowel === 'ㅜ') {
+      if (tense === 'present') {
+        const newChar = buildSyllable(choseong, 14, 0);
+        return { result: stem.slice(0, -1) + newChar + '요', rule: 'ㅜ stem: ㅜ + ㅓ = 워요' };
+      }
+      if (tense === 'past') {
+        const pastChar = buildSyllable(choseong, 14, 19);
+        return { result: stem.slice(0, -1) + pastChar + '어요', rule: 'ㅜ stem: ㅜ + 었 = 웠어요' };
+      }
+      if (tense === 'future') {
+        const futureChar = buildSyllable(choseong, 13, 8);
+        return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: 'ㅜ stem: add ㄹ 거예요' };
+      }
+    }
+
+    // ㅣ ending (마시다, 기다리다)
+    if (vowel === 'ㅣ') {
+      if (tense === 'present') {
+        const newChar = buildSyllable(choseong, 6, 0);
+        return { result: stem.slice(0, -1) + newChar + '요', rule: 'ㅣ stem: ㅣ + ㅓ = 여요' };
+      }
+      if (tense === 'past') {
+        const pastChar = buildSyllable(choseong, 6, 19);
+        return { result: stem.slice(0, -1) + pastChar + '어요', rule: 'ㅣ stem: ㅣ + 었 = 였어요' };
+      }
+      if (tense === 'future') {
+        const futureChar = buildSyllable(choseong, 20, 8);
+        return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: 'ㅣ stem: add ㄹ 거예요' };
+      }
+    }
+
+    // ㅐ, ㅔ, ㅚ, ㅟ ending
+    if (vowel === 'ㅐ' || vowel === 'ㅔ' || vowel === 'ㅚ' || vowel === 'ㅟ') {
+      if (tense === 'present') return { result: stem + '요', rule: vowel + ' stem: add 어요 (contracted)' };
+      if (tense === 'past') {
+        const pastChar = buildSyllable(choseong, jungseong, 19);
+        return { result: stem.slice(0, -1) + pastChar + '어요', rule: vowel + ' stem: add 었어요' };
+      }
+      if (tense === 'future') {
+        const futureChar = buildSyllable(choseong, jungseong, 8);
+        return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: vowel + ' stem: add ㄹ 거예요' };
+      }
+    }
+  }
+
+  // Consonant ending stems (with 받침)
+  if (jongseong !== 0) {
+    const isYangseong = vowel === 'ㅏ' || vowel === 'ㅗ';
+    
+    if (tense === 'present') {
+      return { result: stem + (isYangseong ? '아요' : '어요'), rule: 'Consonant ending: add ' + (isYangseong ? '아요' : '어요') };
+    }
+    if (tense === 'past') {
+      return { result: stem + (isYangseong ? '았어요' : '었어요'), rule: 'Consonant ending: add ' + (isYangseong ? '았어요' : '었어요') };
+    }
+    if (tense === 'future') {
+      return { result: stem + '을 거예요', rule: 'Consonant ending: add 을 거예요' };
+    }
+  }
+
+  return { result: '-', rule: 'Unknown form' };
 }
 
-function update(){
+document.getElementById('verbInput').addEventListener('input', updateResult);
+document.getElementById('endingSelect').addEventListener('change', updateResult);
 
-const verb = verbInput.value.trim();
-const tense = endingSelect.value;
-
-if (!verb.endsWith("다")){
-finalResult.textContent="-";
-ruleDisplay.innerHTML="-";
-return;
+function updateResult() {
+  const verb = document.getElementById('verbInput').value;
+  const tense = document.getElementById('endingSelect').value;
+  const { result, rule } = conjugateVerb(verb, tense);
+  
+  document.getElementById('finalResult').textContent = result;
+  document.getElementById('ruleDisplay').textContent = rule;
 }
-
-let stem = verb.slice(0,-1);
-let last = stem[stem.length-1];
-let parts = getHangulParts(last);
-
-function hasBatchim(p){ return p.final !== 0; }
-function isL(p){ return p.final === 8; }      // ㄹ
-function isB(p){ return p.final === 17; }     // ㅂ
-function isD(p){ return p.final === 7; }      // ㄷ
-function isS(p){ return p.final === 19; }     // ㅅ
-function isH(p){ return p.final === 27; }     // ㅎ
-function isEu(p){ return p.medial === 18; }   // ㅡ
-
-// REAL ㅂ irregular list
-const bIrregulars = ["돕다","곱다","춥다","덥다","어렵다","무겁다","더럽다","맵다","쉽다","귀엽다","아름답다"];
-
-let result = "";
-
-/* ================= PRESENT ================= */
-
-if(tense==="present"){
-
-// 하다
-if(verb==="하다"){
-result = "해요";
-}
-
-// ㅂ irregular
-else if(bIrregulars.includes(verb) && isB(parts)){
-let base = buildHangul(parts.initial, parts.medial, 0);
-if(parts.medial===8) result = stem.slice(0,-1)+base+"와요";
-else result = stem.slice(0,-1)+base+"워요";
-}
-
-// ㄷ irregular
-else if(isD(parts)){
-let base = buildHangul(parts.initial, parts.medial, 8);
-result = stem.slice(0,-1)+base+"어요";
-}
-
-// ㅅ irregular
-else if(isS(parts)){
-let base = buildHangul(parts.initial, parts.medial, 0);
-result = stem.slice(0,-1)+base+"어요";
-}
-
-// 르 irregular
-else if(stem.endsWith("르")){
-let prev = stem[stem.length-2];
-let p = getHangulParts(prev);
-let newPrev = buildHangul(p.initial, p.medial, 8);
-let vowel = (p.medial===0||p.medial===8)?"라요":"러요";
-result = stem.slice(0,-2)+newPrev+vowel;
-}
-
-// ㅎ irregular (adjectives)
-else if(isH(parts)){
-let base = buildHangul(parts.initial, parts.medial, 0);
-result = stem.slice(0,-1)+base+"해요";
-}
-
-// ㅡ drop
-else if(isEu(parts)){
-let prev = stem[stem.length-2];
-let p = getHangulParts(prev);
-let newVowel = (p.medial===0||p.medial===8)?0:4;
-let base = buildHangul(parts.initial,newVowel,parts.final);
-result = stem.slice(0,-1)+base+"요";
-}
-
-// General
-else{
-if(hasBatchim(parts)) result = stem+"어요";
-else{
-let newVowel=(parts.medial===0||parts.medial===8)?0:4;
-let base=buildHangul(parts.initial,newVowel,0);
-result=stem.slice(0,-1)+base+"요";
-}
-}
-
-}
-
-/* ================= PAST ================= */
-
-if(tense==="past"){
-
-if(verb==="하다"){
-result="했어요";
-}
-
-else if(stem.endsWith("르")){
-let prev = stem[stem.length-2];
-let p = getHangulParts(prev);
-let newPrev = buildHangul(p.initial, p.medial, 8);
-let vowel = (p.medial===0||p.medial===8)?"랐어요":"렀어요";
-result = stem.slice(0,-2)+newPrev+vowel;
-}
-
-else{
-if(hasBatchim(parts)) result=stem+"었어요";
-else{
-let newVowel=(parts.medial===0||parts.medial===8)?0:4;
-let base=buildHangul(parts.initial,newVowel,20);
-result=stem.slice(0,-1)+base+"어요";
-}
-}
-
-}
-
-/* ================= FUTURE ================= */
-
-if(tense==="future"){
-
-if(verb==="하다"){
-result="할 거예요";
-}
-
-else if(!hasBatchim(parts)){
-result=stem+"ㄹ 거예요";
-}
-else if(isL(parts)){
-let base=buildHangul(parts.initial,parts.medial,0);
-result=stem.slice(0,-1)+base+"ㄹ 거예요";
-}
-else{
-result=stem+"을 거예요";
-}
-
-}
-
-finalResult.textContent=result;
-ruleDisplay.innerHTML="Auto rule applied";
-
-}
-
-updateRulesByEnding();
-</script>
-
-</body>
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d8382a265b6e4aa',t:'MTc3MjgyMjY1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
