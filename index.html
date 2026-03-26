@@ -126,6 +126,7 @@ function conjugateVerb(verb, tense) {
   // ㅂ irregular (돕다, 춥다, 덥다, 무섭다, 어렵다, 쉽다)
   const bIrregulars = ['돕다', '춥다', '덥다', '무섭다', '어렵다', '쉽다', '아름답다', '귀엽다', '맵다'];
  const sIrregulars = ['긋다', '낫다', '붓다', '잇다', '젓다', '짓다'];
+ const hIrregulars = ['하얗다', '그렇다', '이렇다', '저렇다'];
   if (finalCons === 'ㅂ' && bIrregulars.includes(verb)) {
     const newStemChar = buildSyllable(choseong, jungseong, 0);
     if (verb === '돕다' || verb === '곱다') {
@@ -174,7 +175,52 @@ if (finalCons === 'ㅅ' && sIrregulars.includes(verb)) {
     return { result: withRieul + ' 거예요', rule: 'ㅅ irregular: ㅅ → ㄹ + 거예요' };
   }
 }
+// ㅎ irregular
+if (finalCons === 'ㅎ' && hIrregulars.includes(verb)) {
+  const newStemChar = buildSyllable(choseong, 1, 0); // ㅐ
 
+  if (tense === 'present') {
+    return { result: stem.slice(0, -1) + newStemChar + '요', rule: 'ㅎ irregular: ㅎ drops + ㅐ요' };
+  }
+
+  if (tense === 'past') {
+    const pastChar = buildSyllable(choseong, 1, 19);
+    return { result: stem.slice(0, -1) + pastChar + '어요', rule: 'ㅎ irregular: ㅎ drops + ㅐ + 었어요' };
+  }
+
+  if (tense === 'future') {
+    const futureChar = buildSyllable(choseong, jungseong, 8);
+    return { result: stem.slice(0, -1) + futureChar + ' 거예요', rule: 'ㅎ irregular: ㅎ → ㄹ + 거예요' };
+  }
+}
+ // 르 irregular
+if (stem.endsWith('르')) {
+  const prevChar = stem[stem.length - 2];
+  const prevCode = prevChar.charCodeAt(0);
+
+  if (prevCode >= 0xAC00 && prevCode <= 0xD7A3) {
+    const prevIndex = prevCode - 0xAC00;
+    const prevCho = Math.floor(prevIndex / 588);
+    const prevJung = Math.floor((prevIndex % 588) / 28);
+
+    const addedRieul = buildSyllable(prevCho, prevJung, 8);
+    const base = stem.slice(0, -2) + addedRieul;
+
+    const isAorO = prevJung === 0 || prevJung === 8;
+
+    if (tense === 'present') {
+      return { result: base + (isAorO ? '라요' : '러요'), rule: '르 irregular: add ㄹ + ' + (isAorO ? '라요' : '러요') };
+    }
+
+    if (tense === 'past') {
+      return { result: base + (isAorO ? '랐어요' : '렀어요'), rule: '르 irregular: add ㄹ + past' };
+    }
+
+    if (tense === 'future') {
+      return { result: base + '를 거예요', rule: '르 irregular: add ㄹ + 를 거예요' };
+    }
+  }
+}
   // ㅡ verbs (쓰다, 끄다, 크다, 슬프다, 바쁘다, 예쁘다, 아프다)
   if (vowel === 'ㅡ' && jongseong === 0) {
     let useA = false;
