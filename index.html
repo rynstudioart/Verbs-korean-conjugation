@@ -125,6 +125,7 @@ function conjugateVerb(verb, tense) {
 
   // ㅂ irregular (돕다, 춥다, 덥다, 무섭다, 어렵다, 쉽다)
   const bIrregulars = ['돕다', '춥다', '덥다', '무섭다', '어렵다', '쉽다', '아름답다', '귀엽다', '맵다'];
+ const sIrregulars = ['긋다', '낫다', '붓다', '잇다', '젓다', '짓다'];
   if (finalCons === 'ㅂ' && bIrregulars.includes(verb)) {
     const newStemChar = buildSyllable(choseong, jungseong, 0);
     if (verb === '돕다' || verb === '곱다') {
@@ -150,23 +151,29 @@ function conjugateVerb(verb, tense) {
     }
     if (tense === 'future') return { result: stem + ' 거예요', rule: 'ㄹ stem: ㄹ 거예요' };
   }
+// ㅅ irregular
+if (finalCons === 'ㅅ' && sIrregulars.includes(verb)) {
+  const newStemChar = buildSyllable(choseong, jungseong, 0);
 
-  // ㅅ irregular (짓다, 낫다)
-  if (finalCons === 'ㅅ' && (verb === '짓다' || verb === '낫다' || verb === '붓다' || verb === '잇다')) {
-    const newStemChar = buildSyllable(choseong, jungseong, 0);
-    if (tense === 'present') {
-      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: newStemChar + '아요', rule: 'ㅅ irregular: ㅅ drops + 아요' };
-      return { result: newStemChar + '어요', rule: 'ㅅ irregular: ㅅ drops + 어요' };
+  if (tense === 'present') {
+    if (vowel === 'ㅏ' || vowel === 'ㅗ') {
+      return { result: newStemChar + '아요', rule: 'ㅅ irregular: ㅅ drops + 아요' };
     }
-    if (tense === 'past') {
-      if (vowel === 'ㅏ' || vowel === 'ㅗ') return { result: newStemChar + '았어요', rule: 'ㅅ irregular: ㅅ drops + 았어요' };
-      return { result: newStemChar + '었어요', rule: 'ㅅ irregular: ㅅ drops + 었어요' };
-    }
-    if (tense === 'future') {
-      const withRieul = buildSyllable(choseong, jungseong, 8);
-      return { result: withRieul + ' 거예요', rule: 'ㅅ irregular: ㅅ → ㄹ + 거예요' };
-    }
+    return { result: newStemChar + '어요', rule: 'ㅅ irregular: ㅅ drops + 어요' };
   }
+
+  if (tense === 'past') {
+    if (vowel === 'ㅏ' || vowel === 'ㅗ') {
+      return { result: newStemChar + '았어요', rule: 'ㅅ irregular: ㅅ drops + 았어요' };
+    }
+    return { result: newStemChar + '었어요', rule: 'ㅅ irregular: ㅅ drops + 었어요' };
+  }
+
+  if (tense === 'future') {
+    const withRieul = buildSyllable(choseong, jungseong, 8);
+    return { result: withRieul + ' 거예요', rule: 'ㅅ irregular: ㅅ → ㄹ + 거예요' };
+  }
+}
 
   // ㅡ verbs (쓰다, 끄다, 크다, 슬프다, 바쁘다, 예쁘다, 아프다)
   if (vowel === 'ㅡ' && jongseong === 0) {
